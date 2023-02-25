@@ -20,34 +20,39 @@ public class HomePage {
     private WebElement FAQanswer;
 
     public HomePage (WebDriver driver) {
+
         this.driver = driver;
     }
 
-    public void navigateToHomePage() {
+    public HomePage navigateToHomePage() {
         driver.navigate().to(URL);
         new WebDriverWait(driver, Duration.ofSeconds(3)).until(driver -> (driver.findElement(homeHeader).getText() != null
                 && !driver.findElement(homeHeader).getText().isEmpty()));
+        return this;
     }
 
-    public void acceptCookies() {
+    public HomePage acceptCookies() {
         driver.findElement(cookieButton).isEnabled();
         driver.findElement(cookieButton).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        return this;
     }
 
-    public void pressUpperOrderButton() {
+    public OrderPage pressUpperOrderButton() {
         driver.findElement(upperOrderButton).isEnabled();
         driver.findElement(upperOrderButton).click();
         new WebDriverWait(driver, Duration.ofSeconds(3)).
                 until(ExpectedConditions.visibilityOfElementLocated(OrderPage.getOrderForm()));
+        return new OrderPage(driver);
     }
 
-    public void pressLowerOrderButton() {
+    public OrderPage pressLowerOrderButton() {
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", driver.findElement(lowerOrderButton));
         new WebDriverWait(driver, Duration.ofSeconds(5)).
                 until(ExpectedConditions.elementToBeClickable(lowerOrderButton)).click();
         new WebDriverWait(driver, Duration.ofSeconds(5)).
                 until(ExpectedConditions.visibilityOfElementLocated(OrderPage.getOrderForm()));
+        return new OrderPage(driver);
     }
 
     public String getAnswerToFAQ(int FAQnum) {

@@ -24,27 +24,30 @@ public class OrderPage {
         this.driver = driver;
     }
 
-    public void fillInTextFields(String firstName, String lastName, String address, String phoneNumber) {
+    public OrderPage fillInTextFields(String firstName, String lastName, String address, String phoneNumber) {
         driver.findElement(firstNameInput).sendKeys(firstName);
         driver.findElement(lastNameInput).sendKeys(lastName);
         driver.findElement(addressInput).sendKeys(address);
         driver.findElement(phoneNum).sendKeys(phoneNumber);
+        return this;
     }
 
-    public void selectMetroStation(String station) {
+    public OrderPage selectMetroStation(String station) {
         WebElement selectedStation = driver.findElement(metroStationField);
         selectedStation.click();
         selectedStation.sendKeys(station);
         selectedStation.sendKeys(Keys.ARROW_DOWN);
         selectedStation.sendKeys(Keys.ENTER);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+        return this;
     }
 
-    public void clickProceedButton() {
+    public RentalDetailsPage clickProceedButton() {
         driver.findElement(proceedButton).isEnabled();
         driver.findElement(proceedButton).click();
         new WebDriverWait(driver, Duration.ofSeconds(3)).
                 until(ExpectedConditions.visibilityOfElementLocated(RentalDetailsPage.getOrderHeader()));
+    return new RentalDetailsPage(driver);
     }
 
     public static By getOrderForm() {

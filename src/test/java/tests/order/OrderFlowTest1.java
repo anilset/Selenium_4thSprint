@@ -4,13 +4,13 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.*;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import ru.praktikum_services.qa_scooter.pages.*;
+import ru.praktikum_services.qa_scooter.pages.HomePage;
 import utilities.Utilities;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(Parameterized.class)
@@ -28,6 +28,8 @@ public class OrderFlowTest1 {
     private final String numberOfDays;
     private final String comment;
     private boolean isOrderSubmitted;
+
+    //В этом тесте вход с нижней кнопки, выбор даты по пересечению (календарь - матрица 5х7)
 
     public OrderFlowTest1(
             String firstName, String lastName,
@@ -72,50 +74,43 @@ public class OrderFlowTest1 {
     public void checkOrderFlowFF() {
         driver = new FirefoxDriver();
         new Utilities().setUpFireFoxBonigarcia(driver);
-        HomePage homePage = new HomePage(driver);
-        homePage.navigateToHomePage();
-        homePage.acceptCookies();
-        homePage.pressUpperOrderButton(); //зашли через верхнюю кнопку
+        boolean isOrderSuccessful = new HomePage(driver)
+                .navigateToHomePage()
+                .acceptCookies()
+                .pressUpperOrderButton() //зашли через верхнюю кнопку
+                .fillInTextFields(firstName, lastName, address, phoneNumber)
+                .selectMetroStation(station)
+                .clickProceedButton()
+                .selectDeliveryDate(calendarRow, calendarColumn)
+                .setRentalDuration(numberOfDays)
+                .setBlackColorCheckBox()
+                .leaveComment(comment)
+                .pressSubmitButton()
+                .confirmOrder()
+                .isStatusButtonVisible();
+        assertTrue (isOrderSubmitted == isOrderSuccessful);
 
-        OrderPage orderPage1 = new OrderPage(driver);
-        orderPage1.fillInTextFields(firstName, lastName, address, phoneNumber);
-        orderPage1.selectMetroStation(station);
-        orderPage1.clickProceedButton();
-
-        RentalDetailsPage detailsPage = new RentalDetailsPage(driver);
-        detailsPage.selectDeliveryDate(calendarRow, calendarColumn);
-        detailsPage.setRentalDuration(numberOfDays);
-        detailsPage.setBlackColorCheckBox();
-        detailsPage.leaveComment(comment);
-        detailsPage.pressSubmitButton();
-        detailsPage.confirmOrder();
-        OrderSubmittedConfirmationModalPage orderStatus = new OrderSubmittedConfirmationModalPage(driver);
-        assertEquals(isOrderSubmitted, orderStatus.getStatusButtonSize() != 0);
     }
 
     @Test
     public void checkOrderFlowChrome() { //в хроме все тесты падают по условиям
         driver = new ChromeDriver();
         new Utilities().setUpChromeBonigarcia(driver);
-        HomePage homePage = new HomePage(driver);
-        homePage.navigateToHomePage();
-        homePage.acceptCookies();
-        homePage.pressUpperOrderButton(); //зашли через верхнюю кнопку
-
-        OrderPage orderPage1 = new OrderPage(driver);
-        orderPage1.fillInTextFields(firstName, lastName, address, phoneNumber);
-        orderPage1.selectMetroStation(station);
-        orderPage1.clickProceedButton();
-
-        RentalDetailsPage detailsPage = new RentalDetailsPage(driver);
-        detailsPage.selectDeliveryDate(calendarRow, calendarColumn);
-        detailsPage.setRentalDuration(numberOfDays );
-        detailsPage.setBlackColorCheckBox();
-        detailsPage.leaveComment(comment);
-        detailsPage.pressSubmitButton();
-        detailsPage.confirmOrder();
-        OrderSubmittedConfirmationModalPage orderStatus = new OrderSubmittedConfirmationModalPage(driver);
-        assertEquals(isOrderSubmitted, orderStatus.getStatusButtonSize() != 0);
+        boolean isOrderSuccessful = new HomePage(driver)
+                .navigateToHomePage()
+                .acceptCookies()
+                .pressUpperOrderButton() //зашли через верхнюю кнопку
+                .fillInTextFields(firstName, lastName, address, phoneNumber)
+                .selectMetroStation(station)
+                .clickProceedButton()
+                .selectDeliveryDate(calendarRow, calendarColumn)
+                .setRentalDuration(numberOfDays)
+                .setBlackColorCheckBox()
+                .leaveComment(comment)
+                .pressSubmitButton()
+                .confirmOrder()
+                .isStatusButtonVisible();
+        assertTrue (isOrderSubmitted == isOrderSuccessful);
     }
 
    @After

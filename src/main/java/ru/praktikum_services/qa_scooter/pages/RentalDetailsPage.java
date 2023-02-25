@@ -4,6 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.time.Duration;
 
 public class RentalDetailsPage {
@@ -23,7 +26,7 @@ public class RentalDetailsPage {
         this.driver = driver;
     }
 
-    public void selectDeliveryDate(String calendarRow, String calendarColumn ) {
+    public RentalDetailsPage selectDeliveryDate(String calendarRow, String calendarColumn ) {
         By dateSelect = By.xpath("//body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[2]/div["
                 + calendarRow + "]/div[" + calendarColumn + "]");
         driver.findElement(deliveryDateInput).click();
@@ -34,18 +37,20 @@ public class RentalDetailsPage {
         dateToPick.isEnabled();
         dateToPick.click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        return this;
     }
 
-    public void inputDeliveryDate(String calendarDate) {
+    public RentalDetailsPage inputDeliveryDate(String calendarDate) {
         driver.findElement(deliveryDateInput).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         driver.findElement(deliveryDateInput).sendKeys(calendarDate);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         driver.findElement(deliveryDateInput).sendKeys(Keys.ENTER);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        return this;
     }
 
-    public void setRentalDuration(String numberOfDays) {
+    public RentalDetailsPage setRentalDuration(String numberOfDays) {
         driver.findElement(rentalTermField).isEnabled();
         driver.findElement(rentalTermField).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
@@ -54,36 +59,43 @@ public class RentalDetailsPage {
         dropDownField.isEnabled();
         dropDownField.click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+        return this;
     }
 
-    public void setBlackColorCheckBox() {
+    public RentalDetailsPage setBlackColorCheckBox() {
         driver.findElement(blackColorCheckBox).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+        return this;
     }
 
-    public void setGrayColorCheckBox() {
+    public RentalDetailsPage setGrayColorCheckBox() {
         driver.findElement(grayColorCheckBox).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+        return this;
     }
 
-    public void leaveComment(String comment) {
+    public RentalDetailsPage leaveComment(String comment) {
         WebElement commentInputField = driver.findElement(commentInput);
         commentInputField.clear();
         commentInputField.sendKeys(comment);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+        return this;
     }
 
-    public void pressSubmitButton() {
+    public RentalDetailsPage pressSubmitButton() {
         driver.findElement(submitButton).isEnabled();
         driver.findElement(submitButton).click();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
+        return this;
 
     }
 
-    public void confirmOrder() {
+    public OrderSubmittedConfirmationPage confirmOrder() {
         driver.findElement(confirmationButton).isEnabled();
         driver.findElement(confirmationButton).click();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
+        new WebDriverWait(driver, Duration.ofSeconds(5)).
+                until(ExpectedConditions.visibilityOfElementLocated(OrderSubmittedConfirmationPage.getStatusButton()));
+        return new OrderSubmittedConfirmationPage(driver);
     }
 
     public static By getOrderHeader() {
