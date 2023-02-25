@@ -1,0 +1,128 @@
+package tests.order;
+
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import ru.praktikum_services.qa_scooter.pages.*;
+import utilities.Utilities;
+
+import static org.junit.Assert.assertEquals;
+
+
+@RunWith(Parameterized.class)
+
+public class OrderFlowTest1 {
+
+    private WebDriver driver;
+    private final String firstName;
+    private final String lastName;
+    private final String address;
+    private final String station;
+    private final String phoneNumber;
+    private final String calendarRow;
+    private final String calendarColumn;
+    private final String numberOfDays;
+    private final String comment;
+    private boolean isOrderSubmitted;
+
+    public OrderFlowTest1(
+            String firstName, String lastName,
+            String address, String station, String phoneNumber,
+            String calendarRow, String calendarColumn,
+            String numberOfDays, String commentInput,
+            boolean isOrderSubmitted
+    ) {
+        this.firstName = firstName; //0
+        this.lastName = lastName;   //1
+        this.address = address;     //2
+        this.station = station;     //3
+        this.phoneNumber = phoneNumber; //4
+        this.calendarRow = calendarRow; //5
+        this.calendarColumn = calendarColumn; //6
+        this.numberOfDays = numberOfDays; //7
+        this.comment = commentInput; //8
+        this.isOrderSubmitted = isOrderSubmitted; //9
+    }
+
+    @Parameterized.Parameters (name = "{index} : Имя {0}, Фамилия {1}, Адрес {2}, Метро {3}, Телефон {4}, Ряд календаря {5}, Колонка календаря {6} ," +
+            "кол-во дней аренды {7}, Комментарий {8}, Размещен ли успешно заказ? {9}")
+
+    public static Object[][] setOrderParams() {
+        return new Object[][]{
+                {"Ян", "Ли", "Москва, пр-кт Вернадского, 47 к.4, кв. 75",
+                        "Проспект Вернадского", "+79876543221",
+                        "1", "1", "3", "не звонить", true
+                }, // проходит успешно
+                {"Жан-Жак", "Петров-Водкин", "Бутово, изюмская 5 23",
+                        "Улица Скобелевская", "89076785678",
+                        "5", "7", "6", "", true
+                }, // падает - поля ввода имени и фамилии не принимают дефис
+                {"Anna", "Smith", "Moscow",
+                        "Тверская", "+17896543221",
+                        "3", "4", "1", "", true
+                } // падает - поля ввода имени и фамилии не принимают латиницу
+        };
+    }
+
+    @Test
+    public void checkOrderFlowFF() {
+        driver = new FirefoxDriver();
+        new Utilities().setUpFireFoxBonigarcia(driver);
+        HomePage homePage = new HomePage(driver);
+        homePage.navigateToHomePage();
+        homePage.acceptCookies();
+        homePage.pressUpperOrderButton(); //зашли через верхнюю кнопку
+
+        OrderPage orderPage1 = new OrderPage(driver);
+        orderPage1.fillInTextFields(firstName, lastName, address, phoneNumber);
+        orderPage1.selectMetroStation(station);
+        orderPage1.clickProceedButton();
+
+        RentalDetailsPage detailsPage = new RentalDetailsPage(driver);
+        detailsPage.selectDeliveryDate(calendarRow, calendarColumn);
+        detailsPage.setRentalDuration(numberOfDays);
+        detailsPage.setBlackColorCheckBox();
+        detailsPage.leaveComment(comment);
+        detailsPage.pressSubmitButton();
+        detailsPage.confirmOrder();
+        OrderSubmittedConfirmationModalPage orderStatus = new OrderSubmittedConfirmationModalPage(driver);
+        assertEquals(isOrderSubmitted, orderStatus.getStatusButtonSize() != 0);
+    }
+
+    @Test
+    public void checkOrderFlowChrome() { //в хроме все тесты падают по условиям
+        driver = new ChromeDriver();
+        new Utilities().setUpChromeBonigarcia(driver);
+        HomePage homePage = new HomePage(driver);
+        homePage.navigateToHomePage();
+        homePage.acceptCookies();
+        homePage.pressUpperOrderButton(); //зашли через верхнюю кнопку
+
+        OrderPage orderPage1 = new OrderPage(driver);
+        orderPage1.fillInTextFields(firstName, lastName, address, phoneNumber);
+        orderPage1.selectMetroStation(station);
+        orderPage1.clickProceedButton();
+
+        RentalDetailsPage detailsPage = new RentalDetailsPage(driver);
+        detailsPage.selectDeliveryDate(calendarRow, calendarColumn);
+        detailsPage.setRentalDuration(numberOfDays );
+        detailsPage.setBlackColorCheckBox();
+        detailsPage.leaveComment(comment);
+        detailsPage.pressSubmitButton();
+        detailsPage.confirmOrder();
+        OrderSubmittedConfirmationModalPage orderStatus = new OrderSubmittedConfirmationModalPage(driver);
+        assertEquals(isOrderSubmitted, orderStatus.getStatusButtonSize() != 0);
+    }
+
+   @After
+    public void tearDown() {
+        driver.quit();
+    }
+    //аннотация не работает нормально c FireFox.
+    // также, никак не поучилось настроить Setup через WebDriverFactory для параметризванных тестов
+}
+
